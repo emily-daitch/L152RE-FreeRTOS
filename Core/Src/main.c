@@ -44,6 +44,7 @@
 UART_HandleTypeDef huart2;
 
 osThreadId defaultTaskHandle;
+osThreadId task2Handle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -53,6 +54,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 void StartDefaultTask(void const * argument);
+void StartTask02(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -122,6 +124,10 @@ int main(void)
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
+  /* definition and creation of task2 */
+  osThreadDef(task2, StartTask02, osPriorityAboveNormal, 0, 128);
+  task2Handle = osThreadCreate(osThread(task2), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -133,10 +139,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-	  	HAL_Delay(1000);
-	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-	  	HAL_Delay(1000);
+	  // NOTE: We will never get here as odKernelStart hands off control
+	  // to the scheduler.
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -274,15 +278,34 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-	  	HAL_Delay(1000);
-	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-	  	HAL_Delay(1000);
+	  	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  	osDelay(3000);
 	  	printf("\r\nHello, World!\r\n");
 
     osDelay(1);
   }
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartTask02 */
+/**
+* @brief Function implementing the task2 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask02 */
+void StartTask02(void const * argument)
+{
+  /* USER CODE BEGIN StartTask02 */
+  /* Infinite loop */
+  for(;;)
+  {
+	  	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  	osDelay(1000);
+	  	printf("\r\nHello, World from task 2!\r\n");
+    osDelay(1);
+  }
+  /* USER CODE END StartTask02 */
 }
 
 /**
