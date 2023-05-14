@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,7 +60,12 @@ void StartDefaultTask(void const * argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int _write(int file, char *ptr, int len){
+	for(int i = 0; i < len; i++) {
+		ITM_SendChar(*ptr++);
+	}
+	return len;
+}
 /* USER CODE END 0 */
 
 /**
@@ -70,7 +75,7 @@ void StartDefaultTask(void const * argument);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	  char buf[100];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -128,6 +133,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+	  	HAL_Delay(1000);
+	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+	  	HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -194,7 +203,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -265,6 +274,12 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+	  	HAL_Delay(1000);
+	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+	  	HAL_Delay(1000);
+	  	printf("\r\nHello, World!\r\n");
+
     osDelay(1);
   }
   /* USER CODE END 5 */
