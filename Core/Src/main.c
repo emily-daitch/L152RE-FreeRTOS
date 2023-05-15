@@ -69,6 +69,7 @@ void StartTaskN2(void const * argument);
 void StartTaskIdle(void const * argument);
 
 /* USER CODE BEGIN PFP */
+void vApplicationMallocFailedHook( void );
 
 /* USER CODE END PFP */
 
@@ -89,6 +90,13 @@ float readTemperatureSensor() {
 bool checkNetworkQueue() {
 	int random_bit = rand() % 2;
     return (bool)random_bit;
+}
+
+void vApplicationMallocFailedHook() {
+	printf("\r\nHello, World from vApplicationMallocFailedHook!\r\n");
+	for(;;){
+		//Wait here. Find the fire.
+	}
 }
 /* USER CODE END 0 */
 
@@ -185,7 +193,7 @@ int main(void)
 	  // NOTE: We will never get here as osKernelStart hands off control
 	  // to the scheduler.
     /* USER CODE END WHILE */
-	  	printf("\r\nHello, World kernel shutdown!\r\n");
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
