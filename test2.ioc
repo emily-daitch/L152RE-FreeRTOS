@@ -2,9 +2,10 @@
 CAD.formats=
 CAD.pinconfig=
 CAD.provider=
-FREERTOS.FootprintOK=true
-FREERTOS.IPParameters=Tasks01,configUSE_NEWLIB_REENTRANT,FootprintOK
-FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;task2,1,128,StartTask02,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.FootprintOK=false
+FREERTOS.IPParameters=Tasks01,configUSE_NEWLIB_REENTRANT,FootprintOK,configTOTAL_HEAP_SIZE
+FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;task2,1,128,StartTask02,Default,NULL,Dynamic,NULL,NULL;task3,2,128,StartTask03,Default,NULL,Dynamic,NULL,NULL;taskRT,3,128,StartTaskRT,Default,NULL,Dynamic,NULL,NULL;taskn1,-1,128,StartTaskN1,Default,NULL,Dynamic,NULL,NULL;taskn2,-2,128,StartTaskN2,Default,NULL,Dynamic,NULL,NULL;taskIdle,-3,128,StartTaskIdle,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.configTOTAL_HEAP_SIZE=4500
 FREERTOS.configUSE_NEWLIB_REENTRANT=1
 File.Version=6
 KeepUserPlacement=false

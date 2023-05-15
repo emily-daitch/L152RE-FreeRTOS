@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +47,11 @@ UART_HandleTypeDef huart2;
 
 osThreadId defaultTaskHandle;
 osThreadId task2Handle;
+osThreadId task3Handle;
+osThreadId taskRTHandle;
+osThreadId taskn1Handle;
+osThreadId taskn2Handle;
+osThreadId taskIdleHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -55,6 +62,11 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 void StartDefaultTask(void const * argument);
 void StartTask02(void const * argument);
+void StartTask03(void const * argument);
+void StartTaskRT(void const * argument);
+void StartTaskN1(void const * argument);
+void StartTaskN2(void const * argument);
+void StartTaskIdle(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -68,6 +80,16 @@ int _write(int file, char *ptr, int len){
 	}
 	return len;
 }
+
+float readTemperatureSensor() {
+	float temp = (float)rand() / ((float)RAND_MAX / 100);
+	return temp;
+}
+
+bool checkNetworkQueue() {
+	int random_bit = rand() % 2;
+    return (bool)random_bit;
+}
 /* USER CODE END 0 */
 
 /**
@@ -77,7 +99,8 @@ int _write(int file, char *ptr, int len){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	  char buf[100];
+	  // For eventual USART comm
+	  //char buf[100];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -127,6 +150,26 @@ int main(void)
   /* definition and creation of task2 */
   osThreadDef(task2, StartTask02, osPriorityAboveNormal, 0, 128);
   task2Handle = osThreadCreate(osThread(task2), NULL);
+
+  /* definition and creation of task3 */
+  osThreadDef(task3, StartTask03, osPriorityHigh, 0, 128);
+  task3Handle = osThreadCreate(osThread(task3), NULL);
+
+  /* definition and creation of taskRT */
+  osThreadDef(taskRT, StartTaskRT, osPriorityRealtime, 0, 128);
+  taskRTHandle = osThreadCreate(osThread(taskRT), NULL);
+
+  /* definition and creation of taskn1 */
+  osThreadDef(taskn1, StartTaskN1, osPriorityBelowNormal, 0, 128);
+  taskn1Handle = osThreadCreate(osThread(taskn1), NULL);
+
+  /* definition and creation of taskn2 */
+  osThreadDef(taskn2, StartTaskN2, osPriorityLow, 0, 128);
+  taskn2Handle = osThreadCreate(osThread(taskn2), NULL);
+
+  /* definition and creation of taskIdle */
+  osThreadDef(taskIdle, StartTaskIdle, osPriorityIdle, 0, 128);
+  taskIdleHandle = osThreadCreate(osThread(taskIdle), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -278,11 +321,10 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  	osDelay(3000);
-	  	printf("\r\nHello, World!\r\n");
-
-    osDelay(1);
+	  	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	    //TODO: Respond to user input on blue joystick button
+	  	osDelay(30);
+	  	printf("\r\nHello, World Default Task!\r\n");
   }
   /* USER CODE END 5 */
 }
@@ -300,12 +342,121 @@ void StartTask02(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  	osDelay(1000);
+	  	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  	//TODO: Perform a complex calculation, time intensive
+	  	osDelay(70);
 	  	printf("\r\nHello, World from task 2!\r\n");
-    osDelay(1);
   }
   /* USER CODE END StartTask02 */
+}
+
+/* USER CODE BEGIN Header_StartTask03 */
+/**
+* @brief Function implementing the task3 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTask03 */
+void StartTask03(void const * argument)
+{
+  /* USER CODE BEGIN StartTask03 */
+  /* Infinite loop */
+  for(;;)
+  {
+	    //TODO System monitor Task, alert failure, attempt restart
+		printf("\r\nHello, World from task 3!\r\n");
+	    osDelay(10);
+  }
+  /* USER CODE END StartTask03 */
+}
+
+/* USER CODE BEGIN Header_StartTaskRT */
+/**
+* @brief Function implementing the taskRT thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTaskRT */
+void StartTaskRT(void const * argument)
+{
+  /* USER CODE BEGIN StartTaskRT */
+  /* Infinite loop */
+  for(;;)
+  {
+	//TODO Emergency Shutdown task
+	printf("\r\nHello, World from task RT!\r\n");
+    osDelay(100);
+  }
+  /* USER CODE END StartTaskRT */
+}
+
+/* USER CODE BEGIN Header_StartTaskN1 */
+/**
+* @brief Function implementing the taskn1 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTaskN1 */
+void StartTaskN1(void const * argument)
+{
+  /* USER CODE BEGIN StartTaskN1 */
+  /* Infinite loop */
+  for(;;)
+  {
+	  //Fake network, respond to messages if they exist
+	  bool itemExistsToProcess = checkNetworkQueue();
+	  if (itemExistsToProcess) {
+	      printf("\r\nHello, World from task N1! Task Processed.\r\n");
+	      osDelay(24);
+	  } else {
+	      printf("\r\nHello, World from task N1! No task to process.\r\n");
+	      osDelay(12);
+	  }
+  }
+  /* USER CODE END StartTaskN1 */
+}
+
+/* USER CODE BEGIN Header_StartTaskN2 */
+/**
+* @brief Function implementing the taskn2 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTaskN2 */
+void StartTaskN2(void const * argument)
+{
+  /* USER CODE BEGIN StartTaskN2 */
+  /* Infinite loop */
+  for(;;)
+  {
+	//Read fake temp sensor
+	float temp = readTemperatureSensor();
+	printf("\r\nHello, World from task N2!, temp is %f\r\n", temp);
+    osDelay(8);
+  }
+  /* USER CODE END StartTaskN2 */
+}
+
+/* USER CODE BEGIN Header_StartTaskIdle */
+/**
+* @brief Function implementing the taskIdle thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTaskIdle */
+void StartTaskIdle(void const * argument)
+{
+  /* USER CODE BEGIN StartTaskIdle */
+  /* Infinite loop */
+  static long idleTimeCounter = 0;
+
+  for(;;)
+  {
+		printf("\r\nHello, World from task Idle!\r\n");
+		idleTimeCounter++;
+	    osDelay(1);
+  }
+  /* USER CODE END StartTaskIdle */
 }
 
 /**
