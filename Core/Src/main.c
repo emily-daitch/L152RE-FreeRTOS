@@ -182,10 +182,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  // NOTE: We will never get here as odKernelStart hands off control
+	  // NOTE: We will never get here as osKernelStart hands off control
 	  // to the scheduler.
     /* USER CODE END WHILE */
-
+	  	printf("\r\nHello, World kernel shutdown!\r\n");
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -381,11 +381,21 @@ void StartTaskRT(void const * argument)
 {
   /* USER CODE BEGIN StartTaskRT */
   /* Infinite loop */
+  static long RTcounter = 0;
+
   for(;;)
   {
-	//TODO Emergency Shutdown task
-	printf("\r\nHello, World from task RT!\r\n");
-    osDelay(100);
+	  	//Emergency Shutdown Mock
+	  	//Delay close to max_int for 32 bits, then fake a failure
+		if(RTcounter > 2000000000){
+			//osKernelStop(); vTaskEndScheduler only been implemented for the x86 Real Mode PC port
+			printf("\r\nHello, World from RT! Emergency Shutdown required...\r\n");
+			for(;;){
+				//Mock Shutdown...
+			}
+		}
+		RTcounter++;
+		osDelay(1);
   }
   /* USER CODE END StartTaskRT */
 }
