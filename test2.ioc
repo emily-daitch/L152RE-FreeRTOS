@@ -2,8 +2,9 @@
 CAD.formats=
 CAD.pinconfig=
 CAD.provider=
-FREERTOS.FootprintOK=false
-FREERTOS.IPParameters=Tasks01,configUSE_NEWLIB_REENTRANT,FootprintOK,configTOTAL_HEAP_SIZE,configUSE_MALLOC_FAILED_HOOK,configCHECK_FOR_STACK_OVERFLOW
+FREERTOS.FootprintOK=true
+FREERTOS.IPParameters=Tasks01,configUSE_NEWLIB_REENTRANT,FootprintOK,configTOTAL_HEAP_SIZE,configUSE_MALLOC_FAILED_HOOK,configCHECK_FOR_STACK_OVERFLOW,Queues01
+FREERTOS.Queues01=sendToQueue,16,uint16_t,0,Dynamic,NULL,NULL
 FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;task2,1,128,StartTask02,Default,NULL,Dynamic,NULL,NULL;task3,2,128,StartTask03,Default,NULL,Dynamic,NULL,NULL;taskRT,3,128,StartTaskRT,Default,NULL,Dynamic,NULL,NULL;taskn1,-1,128,StartTaskN1,Default,NULL,Dynamic,NULL,NULL;taskn2,-2,128,StartTaskN2,Default,NULL,Dynamic,NULL,NULL;taskIdle,-3,128,StartTaskIdle,Default,NULL,Dynamic,NULL,NULL
 FREERTOS.configCHECK_FOR_STACK_OVERFLOW=1
 FREERTOS.configTOTAL_HEAP_SIZE=4500

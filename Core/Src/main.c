@@ -52,6 +52,7 @@ osThreadId taskRTHandle;
 osThreadId taskn1Handle;
 osThreadId taskn2Handle;
 osThreadId taskIdleHandle;
+osMessageQId sendToQueueHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -145,6 +146,11 @@ int main(void)
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* definition and creation of sendToQueue */
+  osMessageQDef(sendToQueue, 16, uint16_t);
+  sendToQueueHandle = osMessageCreate(osMessageQ(sendToQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -327,10 +333,13 @@ void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+	uint16_t msg = 0;
+	uint16_t *msgP = &msg;
   for(;;)
   {
 	  	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	    //TODO: Respond to user input on blue joystick button
+	  	xQueueSendToBack(sendToQueueHandle, msgP, 0);
 	  	osDelay(30);
 	  	printf("\r\nHello, World Default Task!\r\n");
   }
