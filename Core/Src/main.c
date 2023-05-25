@@ -95,9 +95,9 @@ bool checkNetworkQueue() {
 
 void vApplicationMallocFailedHook() {
 	printf("\r\nHello, World from vApplicationMallocFailedHook!\r\n");
-	for(;;){
+	//for(;;){
 		//Wait here. Find the fire.
-	}
+	//}
 }
 /* USER CODE END 0 */
 
@@ -149,7 +149,7 @@ int main(void)
 
   /* Create the queue(s) */
   /* definition and creation of sendToQueue */
-  osMessageQDef(sendToQueue, 16, uint16_t);
+  osMessageQDef(sendToQueue, 2, uint16_t);
   sendToQueueHandle = osMessageCreate(osMessageQ(sendToQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -194,10 +194,11 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  //osThreadTerminate();
   while (1)
   {
-	  // NOTE: We will never get here as osKernelStart hands off control
-	  // to the scheduler.
+	  // NOTE: We will never get here, we are choosing not to use the main
+	  // thread for any tasks beyond thread setup and system start.
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -299,7 +300,11 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LD2_Pin|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8
+                          |GPIO_PIN_9, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -307,12 +312,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
+  /*Configure GPIO pins : LD2_Pin PA6 PA7 PA8
+                           PA9 */
+  GPIO_InitStruct.Pin = LD2_Pin|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8
+                          |GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PC6 PC7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -333,13 +347,17 @@ void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-	uint16_t msg = 0;
-	uint16_t *msgP = &msg;
+	//uint16_t msg = 0;
+	//uint16_t *msgP = &msg;
   for(;;)
   {
 	  	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	    //TODO: Respond to user input on blue joystick button
-	  	xQueueSendToBack(sendToQueueHandle, msgP, 0);
+	  	int stateOfPushButton = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
+	  	//msg = stateOfPushButton;
+	  	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, stateOfPushButton);
+
+	  	//xQueueSendToBack(sendToQueueHandle, msgP, 0);
 	  	osDelay(30);
 	  	printf("\r\nHello, World Default Task!\r\n");
   }
@@ -359,7 +377,7 @@ void StartTask02(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);
 	  	//TODO: Perform a complex calculation, time intensive
 	  	osDelay(70);
 	  	printf("\r\nHello, World from task 2!\r\n");
@@ -382,7 +400,7 @@ void StartTask03(void const * argument)
   {
 	    //TODO System monitor Task, alert failure, attempt restart
 		printf("\r\nHello, World from task 3!\r\n");
-	    osDelay(10);
+	    osDelay(1000);
   }
   /* USER CODE END StartTask03 */
 }
@@ -403,8 +421,8 @@ void StartTaskRT(void const * argument)
   for(;;)
   {
 	  	//Emergency Shutdown Mock
-	  	//Delay close to max_int for 32 bits, then fake a failure
-		if(RTcounter > 2000000000){
+	  	//Delay 5 seconds, then fake a failure
+		if(RTcounter > 10){
 			//osKernelStop(); vTaskEndScheduler only been implemented for the x86 Real Mode PC port
 			printf("\r\nHello, World from RT! Emergency Shutdown required...\r\n");
 			for(;;){
@@ -412,7 +430,7 @@ void StartTaskRT(void const * argument)
 			}
 		}
 		RTcounter++;
-		osDelay(1);
+		osDelay(1000);
   }
   /* USER CODE END StartTaskRT */
 }
@@ -428,18 +446,30 @@ void StartTaskN1(void const * argument)
 {
   /* USER CODE BEGIN StartTaskN1 */
   /* Infinite loop */
-  for(;;)
-  {
-	  //Fake network, respond to messages if they exist
-	  bool itemExistsToProcess = checkNetworkQueue();
-	  if (itemExistsToProcess) {
-	      printf("\r\nHello, World from task N1! Task Processed.\r\n");
-	      osDelay(24);
-	  } else {
-	      printf("\r\nHello, World from task N1! No task to process.\r\n");
-	      osDelay(12);
+//  for(;;)
+//  {
+//	  //Fake network, respond to messages if they exist
+//	  //bool itemExistsToProcess = checkNetworkQueue();
+//	  uint16_t buf = 0;
+//	  uint16_t *bufP = &buf;
+//	  //xQueueReceive(sendToQueueHandle, bufP, 0);
+//      printf("\r\nHello, World from task N1! Task Processed?\r\n");
+//
+//	  if (*bufP) {
+//	      printf("\r\nHello, World from task N1! Task Processed. %d\r\n", *bufP);
+//	      osDelay(24);
+//	  } else {
+//	      printf("\r\nHello, World from task N1! No task to process.%d\r\n", *bufP);
+//	      osDelay(12);
+//	  }
+//  }
+	  for(;;)
+	  {
+		//Read fake temp sensor
+		//float temp = 20;//readTemperatureSensor();
+		//printf("\r\nHello, World from task N2!, temp is %f\r\n", temp);
+	    osDelay(50);
 	  }
-  }
   /* USER CODE END StartTaskN1 */
 }
 
@@ -457,9 +487,9 @@ void StartTaskN2(void const * argument)
   for(;;)
   {
 	//Read fake temp sensor
-	float temp = readTemperatureSensor();
-	printf("\r\nHello, World from task N2!, temp is %f\r\n", temp);
-    osDelay(8);
+	//float temp = readTemperatureSensor();
+	//printf("\r\nHello, World from task N2!, temp is %f\r\n", temp);
+    osDelay(500);
   }
   /* USER CODE END StartTaskN2 */
 }
@@ -475,12 +505,12 @@ void StartTaskIdle(void const * argument)
 {
   /* USER CODE BEGIN StartTaskIdle */
   /* Infinite loop */
-  static long idleTimeCounter = 0;
+  //static long idleTimeCounter = 0;
 
   for(;;)
   {
 		printf("\r\nHello, World from task Idle!\r\n");
-		idleTimeCounter++;
+		//idleTimeCounter++;
 	    osDelay(1);
   }
   /* USER CODE END StartTaskIdle */
